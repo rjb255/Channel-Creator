@@ -1,0 +1,25 @@
+{
+    "name": "channel-creator",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "type": "module",
+    "scripts": {
+        "test": "./testing.mjs"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/rjb255/Channel-Creator.git"
+    },
+    "author": "rjb255",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/rjb255/Channel-Creator/issues"
+    },
+    "homepage": "https://github.com/rjb255/Channel-Creator#readme",
+    "dependencies": {
+        "discord.js": "^12.5.3",
+        "dotenv": "^8.2.0",
+        "fs": "*"
+    }
+}
