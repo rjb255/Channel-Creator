@@ -107,4 +107,4 @@ dist
 .vscode/
 
 #MISC
-testing.js
+testing.mjs
