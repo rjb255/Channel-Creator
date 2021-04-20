@@ -1,9 +1,9 @@
 //Imports
 import dotenv from "dotenv"; // Securely get env variables
-dotenv.config();
 import fs from "fs"; // File reading even upon modification
 import Discord from "discord.js"; // Discord Specific Stuff
 import { serverConfig, checkThrough, reactionChange } from "cus-functions"; // Custom Functions
+dotenv.config();
 
 //Defining characteristics async
 let config = {};
