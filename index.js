@@ -10,7 +10,7 @@ let config = {};
 let relations = {};
 const [, , TOKEN, testcategoryId, testmainChannel, bot] = await Promise.resolve([
     (config = JSON.parse(fs.readFileSync("./serverConfig/properties.json", "utf-8"))),
-    (relations = JSON.parse(fs.readFileSync("./serverConfig/message2channgel.json", "utf-8"))),
+    (relations = JSON.parse(fs.readFileSync("./serverConfig/message2channel.json", "utf-8"))),
     process.env.TOKEN,
     "795967254289973268",
     "795982405260410880",

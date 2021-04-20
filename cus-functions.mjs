@@ -2,7 +2,7 @@ import fs from "fs";
 
 //Adds category and main channel to server
 function serverConfig(server, globals) {
-    config = globals[config];
+    let config = globals["config"];
     if (config[server.id]) {
         if (!server.mainChannel) server.mainChannel = server.channels.cache.get(config[server.id].mainChannel);
         if (!server.categoryId) server.categoryId = server.channels.cache.get(config[server.id].categoryId);
@@ -86,6 +86,7 @@ function updateRel(globals) {
 
 //Updates entire server: may change for larger servers
 function reactionChange(reaction, user, state, globals) {
+    server = reaction.message.guild;
     if (serverConfig(server, config, globals) === true) {
         if (server.mainChannel == reaction.message.channel) {
             server.mainChannel.messages.fetch().then((m) => checkThrough(m, server, globals));
