@@ -30,6 +30,7 @@ bot.on("ready", () => {
     });
 });
 
+//Clear Test server when required
 bot.on("message", (msg) => {
     let server = msg.guild;
     if (!serverProperties(server, globals)) break;
@@ -38,14 +39,15 @@ bot.on("message", (msg) => {
     }
 });
 
+//When a message is reacted/unreacted, update the channels
 bot.on("messageReactionAdd", async (reaction, user) => {
     reactionChange(reaction, user, 1, globals);
 });
-
 bot.on("messageReactionRemove", async (reaction, user) => {
     reactionChange(reaction, user, 0, globals);
 });
 
+//Clean the server
 async function clear(server) {
     for (c of server.channels.cache) {
         let ch = server.channels.cache.get(c[0]);
