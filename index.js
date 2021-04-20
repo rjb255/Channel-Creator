@@ -1,39 +1,44 @@
-import dotenv from "dotenv";
+//Imports
+import dotenv from "dotenv"; // Securely get env variables
 dotenv.config();
-import fs from "fs";
-import { serverProperties } from "./serverConfig/properties.js";
-import Client from "discord.js";
+import fs from "fs"; // File reading even upon modification
+import Discord from "discord.js"; // Discord Specific Stuff
+import { serverConfig } from "cus-functions"; // Custom Functions
 
+//Defining characteristics async
 let config = {};
-const [, TOKEN, testcategoryId, testmainChannel] = await Promise.allSettled([
-    fs.readFile("./serverConfig/properties.json", "utf-8", (err, data) => {
-        if (err) console.error(err);
-        config = JSON.parse(data);
-    }),
+let relations = {};
+const [, , TOKEN, testcategoryId, testmainChannel, bot] = await Promise.resolve([
+    (config = JSON.parse(fs.readFileSync("./serverConfig/properties.json", "utf-8"))),
+    (relations = JSON.parse(fs.readFileSync("./serverConfig/message2channgel.json", "utf-8"))),
     process.env.TOKEN,
     "795967254289973268",
     "795982405260410880",
+    new Discord.Client({ partials: ["MESSAGE", "CHANNEL", "REACTION"] }),
 ]);
-
+global = { config, relations };
 bot.login(TOKEN);
 
+//Update the server after a hiatus
 bot.on("ready", () => {
-    console.info(`Logged in as ${bot.user.tag}!`);
-    bot.guilds.cache.forEach((server) => update(server));
+    console.log(`Logged in as ${bot.user.tag}!`);
+    bot.guilds.cache.forEach((server) => {
+        console.info(`Loaded on ${server.id} (${server.name}!)`);
+        if (serverConfig(server, globals) === true) {
+            server.mainChannel.messages.fetch().then((m) => checkThrough(m, server, globals));
+        }
+    });
 });
 
 bot.on("message", (msg) => {
     let server = msg.guild;
-    serverProperties(server);
-    if (msg.content == "restart") {
+    if (!serverProperties(server, globals)) break;
+    if (msg.content == "restart" && server.mainChannel == testmainChannel) {
         clear(server);
     } else {
         let channel = msg.channel.id;
-        console.info(`In channel id ${channel}`);
-
         if (channel === server.mainChannel.id && msg.author.id != bot.user.id) {
             let category = server.channels.cache.find((c) => c.id == server.categoryId.id && c.type == "category");
-
             server.channels
                 .create(msg.content, {
                     type: "text",
@@ -76,14 +81,15 @@ bot.on("message", (msg) => {
 });
 
 function channelCreated(channel, msg, category) {
-    msg.delete();
     let duplicate = channel.guild.channels.cache.find(
         (c) => c.id != channel.id && c.parentID == category.id && c.name == channel.name
     );
-    if (duplicate) {
+    if (duplicate.size) {
         channel.delete();
     } else {
-        msg.channel.send(channel.name);
+        msg.channel
+            .send(`Welcome to this server. Please use this as a place to talk & prepare activities related to the title of this server.
+Don't be shy. We are all friends here xx.`);
     }
 }
 
@@ -103,21 +109,10 @@ async function clear(server) {
     }
 }
 
-function update(server) {
-    serverProperties(server);
-    server.mainChannel.messages.fetch().then((m) => checkThrough(m, server));
-}
+bot.on("messageReactionAdd", async (reaction, user) => {
+    reactionChange(reaction, user, 1);
+});
 
-function checkThrough(messages, server) {
-    messages.forEach((msg) => {
-        let channel = server.channels.cache.find((c) => c.parentID == server.categoryId.id && c.name == msg.content);
-        if (channel) {
-            channel.lockPermissions().then(function () {
-                let red = msg.reactions.cache.users
-                    .fetch()
-                    .then((users) => reaction.cache.map((item) => item.users.cache.array()));
-                red.forEach((r) => channel.updateOverwrite(r.id, { VIEW_CHANNEL: true }));
-            });
-        }
-    });
-}
+bot.on("messageReactionRemove", async (reaction, user) => {
+    reactionChange(reaction, user, 0);
+});

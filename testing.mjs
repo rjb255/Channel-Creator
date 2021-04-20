@@ -1,19 +1,42 @@
 import dotenv from "dotenv";
 dotenv.config();
 import fs from "fs";
-
-import Client from "discord.js";
-
+import { serverConfig } from "./cus-functions.mjs";
+import Discord from "discord.js";
 let config = {};
-const [, TOKEN, testcategoryId, testmainChannel] = await Promise.allSettled([
-    fs.readFile("./serverConfig/properties.json", "utf-8", (err, data) => {
-        if (err) console.error(err);
-        config = JSON.parse(data);
-    }),
+let relations = {};
+const [, , TOKEN, testcategoryId, testmainChannel, bot] = await Promise.resolve([
+    (config = JSON.parse(fs.readFileSync("./serverConfig/properties.json", "utf-8"))),
+    (relations = JSON.parse(fs.readFileSync("./serverConfig/message2channgel.json", "utf-8"))),
     process.env.TOKEN,
     "795967254289973268",
     "795982405260410880",
+    new Discord.Client({ partials: ["MESSAGE", "CHANNEL", "REACTION"] }),
 ]);
-console.log(testcategoryId);
+
+bot.login(TOKEN);
+
+bot.on("ready", () => {
+    console.info(`Logged in as ${bot.user.tag}!`);
+    bot.guilds.cache.forEach((server) => {
+        console.info(`Loaded on ${server.id} (${server.name}!)`);
+        if (serverConfig(server, config) === true) {
+            // server.mainChannel.messages.fetch().then((m) => checkThrough(m, server));
+        }
+    });
+});
+
+bot.on("messageReactionAdd", async (reaction, user) => {
+    //reactionChange(reaction, user, 1);
+    console.log(reaction);
+});
+
+bot.on("messageReactionRemove", async (reaction, user) => {
+    //reactionChange(reaction, user, 0);
+});
+
+// config.array.forEach((element) => {
+//     console.log(element);
+// });
 // config;
 // console.log(config);
