@@ -1,5 +1,6 @@
 import fs from "fs";
 
+//Adds category and main channel to server
 function serverConfig(server, globals) {
     config = globals[config];
     if (config[server.id]) {
@@ -12,6 +13,7 @@ function serverConfig(server, globals) {
     }
 }
 
+//Goes through the entire mainchannel to update
 function checkThrough(messages, server, globals) {
     messages.forEach((msg) => {
         if (globals["relations"][msg.id]) {
@@ -35,6 +37,7 @@ function checkThrough(messages, server, globals) {
     });
 }
 
+//Creates a channel if none currently exist
 function channelCreator(msg, server, globals) {
     let bot = globals["bot"];
     let category = server.categoryId;
@@ -76,13 +79,17 @@ function channelCreator(msg, server, globals) {
         .catch(console.error);
 }
 
+//Updates the relations
 function updateRel(globals) {
     fs.writeFile("./serverConfig/message2channel.json", globals["relations"]);
 }
 
+//Updates entire server: may change for larger servers
 function reactionChange(reaction, user, state, globals) {
     if (serverConfig(server, config, globals) === true) {
-        server.mainChannel.messages.fetch().then((m) => checkThrough(m, server, globals));
+        if (server.mainChannel == reaction.message.channel) {
+            server.mainChannel.messages.fetch().then((m) => checkThrough(m, server, globals));
+        }
     }
 }
 
