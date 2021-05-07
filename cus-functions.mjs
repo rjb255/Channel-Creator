@@ -16,17 +16,18 @@ function serverConfig(server, globals) {
 
 //Goes through the entire mainchannel to update
 function checkThrough(messages, server, globals) {
-    messages.forEach((msg) => {
+    messages.forEach(async (msg) => {
         let red = msg.reactions.cache;
         if (red.size > 0) {
+            var creation;
             if (!globals["relations"][msg.id]) {
-                globals = channelCreator(msg, server, globals);
+                await channelCreator(msg, server, globals);
             }
 
             let channel = server.channels.cache.find((c) => c.id == globals["relations"][msg.id]);
             if (!(channel && channel != server.mainChannel)) {
                 console.error("Error in relations json. Proceeding to overwrite");
-                globals = channelCreator(msg, server, globals);
+                await channelCreator(msg, server, globals);
             }
             channel = server.channels.cache.find((c) => c.id == globals["relations"][msg.id]);
             channel.lockPermissions().then(function () {
@@ -41,45 +42,42 @@ function checkThrough(messages, server, globals) {
 }
 
 //Creates a channel if none currently exist
-async function channelCreator(msg, server, globals) {
+function channelCreator(msg, server, globals) {
     let bot = globals["bot"];
     let category = server.categoryId;
-    let creation = await Promise.resolve(
-        server.channels
-            .create(msg.content.length > 91 ? msg.content.substring(0, 90) : msg.content, {
-                type: "text",
-                permissionOverwrites: [
-                    {
-                        id: server.id,
-                        deny: ["VIEW_CHANNEL"],
-                    },
-                    {
-                        id: bot.user.id,
-                        allow: ["VIEW_CHANNEL"],
-                    },
-                ],
-                parent: category,
-            })
-            .then((c) => {
-                let duplicate = server.channels.cache.find(
-                    (channel) => c.id != channel.id && channel.parentID == category.id && c.name == channel.name
+    return server.channels
+        .create(msg.content.length > 91 ? msg.content.substring(0, 90) : msg.content, {
+            type: "text",
+            permissionOverwrites: [
+                {
+                    id: server.id,
+                    deny: ["VIEW_CHANNEL"],
+                },
+                {
+                    id: bot.user.id,
+                    allow: ["VIEW_CHANNEL"],
+                },
+            ],
+            parent: category,
+        })
+        .then((c) => {
+            let duplicate = server.channels.cache.find(
+                (channel) => c.id != channel.id && channel.parentID == category.id && c.name == channel.name
+            );
+            if (duplicate) {
+                c.delete();
+                globals["relations"][msg.id] = duplicate.id;
+            } else {
+                globals["relations"][msg.id] = c.id;
+                c.send(
+                    `Welcome to this channel. Please use this as a place to talk & prepare activities related to the title of this server.` +
+                        `\nDon't be shy. We're all friends here xx.`
                 );
-                if (duplicate) {
-                    c.delete();
-                    globals["relations"][msg.id] = duplicate.id;
-                } else {
-                    globals["relations"][msg.id] = c.id;
-                    c.send(
-                        `Welcome to this channel. Please use this as a place to talk & prepare activities related to the title of this server.` +
-                            `\nDon't be shy. We're all friends here xx.`
-                    );
-                }
-                updateRel(globals);
-            })
-            .catch(console.error)
-    );
-
-    return globals;
+            }
+            updateRel(globals);
+            return globals;
+        })
+        .catch(console.error);
 }
 
 //Updates the relations

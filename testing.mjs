@@ -1,43 +1,21 @@
-import dotenv from "dotenv";
-dotenv.config();
-import fs from "fs";
-import { serverConfig } from "./cus-functions.mjs";
-import Discord from "discord.js";
-let config = {};
-let relations = {};
-const [, , TOKEN, testcategoryId, testmainChannel, bot] = await Promise.resolve([
-    (config = JSON.parse(fs.readFileSync("./serverConfig/properties.json", "utf-8"))),
-    (relations = JSON.parse(fs.readFileSync("./serverConfig/message2channel.json", "utf-8"))),
-    process.env.TOKEN,
-    "795967254289973268",
-    "795982405260410880",
-    new Discord.Client({ partials: ["MESSAGE", "CHANNEL", "REACTION"] }),
-]);
-let globals = { config, relations, bot };
-
-bot.login(TOKEN);
-
-bot.on("ready", () => {
-    console.info(`Logged in as ${bot.user.tag}!`);
-    bot.guilds.cache.forEach((server) => {
-        console.info(`Loaded on ${server.id} (${server.name}!)`);
-        if (serverConfig(server, globals) === true) {
-            // server.mainChannel.messages.fetch().then((m) => checkThrough(m, server));
+function doStuff(n /* `n` is expected to be a positive number */) {
+    return new Promise(function (resolve, reject) {
+        setTimeout(function () {
+            resolve(n * 10);
+        }, Math.floor(Math.random() * 1000));
+    }).then(function (result) {
+        if (result > 100) {
+            console.log(result + " is greater than 100");
+        } else {
+            console.log(result + " is not greater than 100");
         }
+        // `return` `result` or other value here
+        // to avoid `undefined` at chained `.then()`
+        return "hhey";
     });
+}
+var hey = doStuff(60);
+doStuff(9).then(function (data) {
+    console.log("data is: " + data); // `data` is not `undefined`
 });
-
-bot.on("messageReactionAdd", async (reaction, user) => {
-    //reactionChange(reaction, user, 1);
-    console.log(reaction);
-});
-
-bot.on("messageReactionRemove", async (reaction, user) => {
-    //reactionChange(reaction, user, 0);
-});
-
-// config.array.forEach((element) => {
-//     console.log(element);
-// });
-// config;
-// console.log(config);
+console.log(hey);
