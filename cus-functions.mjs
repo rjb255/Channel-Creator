@@ -29,7 +29,9 @@ function checkThrough(messages, server, globals) {
                 console.error("Error in relations json. Proceeding to overwrite");
                 await channelCreator(msg, server, globals);
             }
-            channel = server.channels.cache.find((c) => c.id == globals["relations"][msg.id]);
+        }
+        if (globals["relations"][msg.id]) {
+            let channel = server.channels.cache.find((c) => c.id == globals["relations"][msg.id]);
             channel.lockPermissions().then(function () {
                 let reacc = msg.reactions.cache.forEach((re) => {
                     re.users.fetch().then((item) => {
@@ -82,7 +84,7 @@ function channelCreator(msg, server, globals) {
 
 //Updates the relations
 function updateRel(globals) {
-    fs.writeFile("./serverConfig/message2channel.json", JSON.stringify(globals["relations"]), function () {
+    fs.writeFile("./serverConfig/message2channel.json", JSON.stringify(globals["relations"], null, "\t"), function () {
         console.info("Update relations");
     });
 }
