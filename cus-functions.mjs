@@ -16,38 +16,67 @@ function serverConfig(server, globals) {
 
 //Goes through the entire mainchannel to update
 function checkThrough(messages, server, globals) {
+    var xoxo;
     messages.forEach(async (msg) => {
         let red = msg.reactions.cache;
         if (red.size > 0) {
-            var creation;
-            if (!globals["relations"][msg.id]) {
-                await channelCreator(msg, server, globals);
+            if (!globals["relations"]?.[server.id]?.[msg.id]) {
+                console.log("here");
+                xoxo = await channelCreator(msg, server, globals);
+                console.log("success");
             }
 
-            let channel = server.channels.cache.find((c) => c.id == globals["relations"][msg.id]);
+            let channel = server.channels.cache.find((c) => c.id == globals["relations"][server.id][msg.id]);
             if (!(channel && channel != server.mainChannel)) {
                 console.error("Error in relations json. Proceeding to overwrite");
                 await channelCreator(msg, server, globals);
             }
         }
-        if (globals["relations"][msg.id]) {
-            let channel = server.channels.cache.find((c) => c.id == globals["relations"][msg.id]);
-            channel.lockPermissions().then(function () {
-                let reacc = msg.reactions.cache.forEach((re) => {
-                    re.users.fetch().then((item) => {
-                        item.forEach((reactor) => channel.updateOverwrite(reactor.id, { VIEW_CHANNEL: true }));
-                    });
+    });
+
+    var X = {};
+    for (var i of Object.keys(globals["relations"][server.id])) {
+        X[list[i]] = X[list[i]] ?? [];
+        X[list[i]].push(i);
+    }
+
+    for (var i of Object.keys(X)) {
+        let users = [];
+        let channel = server.channels.cache.find((c) => c.id == i);
+        X[i].forEach((e) => {
+            let msg = channel.messages.cache.find((m) => m.id == e);
+            msg.reactions.cache.forEach((re) => {
+                re.users.fetch().then((item) => {
+                    users = [...new Set([...users, ...item])];
                 });
             });
+        });
+        {
+            console.log(users);
         }
-    });
+    }
 }
+
+//////////////////////////////////////////////////////////////////////////////////
+
+// if (globals["relations"][msg.id]) {
+//     let channel = server.channels.cache.find((c) => c.id == globals["relations"][msg.id]);
+//     channel.lockPermissions().then(function () {
+//         let reacc = msg.reactions.cache.forEach((re) => {
+//             re.users.fetch().then((item) => {
+//                 item.forEach((reactor) => channel.updateOverwrite(reactor.id, { VIEW_CHANNEL: true }));
+//             });
+//         });
+//     });
+// }
+
+///////////////////////////////////////////////////////////////////////////////////
 
 //Creates a channel if none currently exist
 function channelCreator(msg, server, globals) {
     let bot = globals["bot"];
     let category = server.categoryId;
-    return server.channels
+    server.channels
         .create(msg.content.length > 91 ? msg.content.substring(0, 90) : msg.content, {
             type: "text",
             permissionOverwrites: [
@@ -66,11 +95,12 @@ function channelCreator(msg, server, globals) {
             let duplicate = server.channels.cache.find(
                 (channel) => c.id != channel.id && channel.parentID == category.id && c.name == channel.name
             );
+            globals["relations"][server.id] = globals["relations"][server.id] || {};
             if (duplicate) {
                 c.delete();
-                globals["relations"][msg.id] = duplicate.id;
+                globals["relations"][server.id][msg.id] = duplicate.id;
             } else {
-                globals["relations"][msg.id] = c.id;
+                globals["relations"][server.id][msg.id] = c.id;
                 c.send(
                     `Welcome to this channel. Please use this as a place to talk & prepare activities related to the title of this server.` +
                         `\nDon't be shy. We're all friends here xx.`
