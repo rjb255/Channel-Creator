@@ -94,7 +94,13 @@ function reactionChange(reaction, user, state, globals) {
     let server = reaction.message.guild;
     if (serverConfig(server, globals) === true) {
         if (server.mainChannel == reaction.message.channel) {
-            server.mainChannel.messages.fetch().then((m) => checkThrough(m, server, globals));
+            if (globals.relations[reaction.message.id]) {
+                let channel = server.channels.cache.get(globals.relations[reaction.message.id])
+                console.log(channel)
+                channel.updateOverwrite(user, {VIEW_CHANNEL: state})
+            } else {
+                server.mainChannel.messages.fetch().then((m) => checkThrough(m, server, globals));
+            }
         }
     }
 }
