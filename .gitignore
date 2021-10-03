@@ -108,3 +108,4 @@ dist
 
 #MISC
 testing.mjs
+serverConfig/*

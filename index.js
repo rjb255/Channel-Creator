@@ -32,8 +32,8 @@ bot.on("ready", () => {
 
 //When a message is reacted/unreacted, update the channels
 bot.on("messageReactionAdd", async (reaction, user) => {
-    reactionChange(reaction, user, 1, globals);
+    reactionChange(reaction, user, true, globals);
 });
 bot.on("messageReactionRemove", async (reaction, user) => {
-    reactionChange(reaction, user, 0, globals);
+    reactionChange(reaction, user, false, globals);
 });
