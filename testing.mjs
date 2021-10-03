@@ -1,21 +1,42 @@
-function doStuff(n /* `n` is expected to be a positive number */) {
-    return new Promise(function (resolve, reject) {
-        setTimeout(function () {
-            resolve(n * 10);
-        }, Math.floor(Math.random() * 1000));
-    }).then(function (result) {
-        if (result > 100) {
-            console.log(result + " is greater than 100");
-        } else {
-            console.log(result + " is not greater than 100");
-        }
-        // `return` `result` or other value here
-        // to avoid `undefined` at chained `.then()`
-        return "hhey";
-    });
+import { DataResolver } from "discord.js";
+
+var X = [1, 2, 3, 4, 5];
+var j = 0;
+
+for (var i of X) {
+    let y = 0;
+    j += i;
+    var he = await hero();
+    console.log(he);
+    while (y < 1000000000) {
+        y++;
+    }
+    console.log(y);
 }
-var hey = doStuff(60);
-doStuff(9).then(function (data) {
-    console.log("data is: " + data); // `data` is not `undefined`
-});
-console.log(hey);
+var a = await Promise.all([
+    X.map(async (i) => {
+        let y = 0;
+        j += i;
+        he = await hero();
+        console.log(he);
+        while (y < 1000000000) {
+            y++;
+        }
+        console.log(y);
+    }),
+]);
+
+console.log("hey");
+console.log(j);
+
+function hero() {
+    let str = new Promise((resolve, reject) => {
+        let y = 0;
+        while (y < 1000000000) {
+            y++;
+        }
+        console.log("boo");
+        resolve("yolo");
+    });
+    return str;
+}
